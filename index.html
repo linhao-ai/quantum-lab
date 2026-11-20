@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="量子计算交互模型实验室：布洛赫球、量子电路、纠缠与贝尔不等式、Grover 搜索。">
+<title>量子计算 · 交互模型实验室</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='24' r='22' fill='%23040810'/%3E%3Ccircle cx='24' cy='24' r='4.5' fill='%2339e6ff'/%3E%3Cellipse cx='24' cy='24' rx='17' ry='7' fill='none' stroke='%2339e6ff' stroke-width='2'/%3E%3Cellipse cx='24' cy='24' rx='17' ry='7' fill='none' stroke='%23a78bfa' stroke-width='2' transform='rotate(60 24 24)'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="bg" aria-hidden="true"></div>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 48 48" aria-hidden="true">
+        <circle cx="24" cy="24" r="4.4" fill="url(#lg1)"/>
+        <ellipse cx="24" cy="24" rx="19" ry="8" fill="none" stroke="url(#lg2)" stroke-width="1.4" opacity=".9"/>
+        <ellipse cx="24" cy="24" rx="19" ry="8" fill="none" stroke="url(#lg2)" stroke-width="1.4" opacity=".55" transform="rotate(60 24 24)"/>
+        <ellipse cx="24" cy="24" rx="19" ry="8" fill="none" stroke="url(#lg2)" stroke-width="1.4" opacity=".55" transform="rotate(120 24 24)"/>
+        <circle cx="43" cy="24" r="2.1" fill="#39e6ff"/>
+        <defs>
+          <radialGradient id="lg1"><stop offset="0" stop-color="#eafcff"/><stop offset="1" stop-color="#39e6ff"/></radialGradient>
+          <linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#39e6ff"/><stop offset="1" stop-color="#a78bfa"/></linearGradient>
+        </defs>
+      </svg>
+      <div class="titles">
+        <div class="eyebrow">QUANTUM COMPUTING · INTERACTIVE MODEL</div>
+        <h1>量子计算 · 交互模型实验室</h1>
+        <p class="lede">从单个量子比特到纠缠与搜索加速——五个可以动手的模型，全部由页面内置的态矢量模拟器实时计算。</p>
+      </div>
+    </div>
+    <div class="hero-meta">
+      <div class="meta"><b>3</b><span>量子比特</span></div>
+      <div class="meta"><b>2<sup>n</sup></b><span>态矢量</span></div>
+      <div class="meta"><b>0</b><span>外部依赖</span></div>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="演示模块">
+  <button class="tab is-active" role="tab" aria-selected="true" aria-controls="panel-bloch" data-tab="bloch">
+    <span class="t-num">01</span><span class="t-name">量子比特</span><span class="t-desc">布洛赫球</span>
+  </button>
+  <button class="tab" role="tab" aria-selected="false" aria-controls="panel-circuit" data-tab="circuit">
+    <span class="t-num">02</span><span class="t-name">量子电路</span><span class="t-desc">门与态矢量</span>
+  </button>
+  <button class="tab" role="tab" aria-selected="false" aria-controls="panel-chsh" data-tab="chsh">
+    <span class="t-num">03</span><span class="t-name">量子纠缠</span><span class="t-desc">贝尔不等式</span>
+  </button>
+  <button class="tab" role="tab" aria-selected="false" aria-controls="panel-grover" data-tab="grover">
+    <span class="t-num">04</span><span class="t-name">Grover 搜索</span><span class="t-desc">振幅放大</span>
+  </button>
+  <button class="tab" role="tab" aria-selected="false" aria-controls="panel-theory" data-tab="theory">
+    <span class="t-num">05</span><span class="t-name">数学原理</span><span class="t-desc">公式速览</span>
+  </button>
+</nav>
+
+<main>
+  <!-- ============ 01 布洛赫球 ============ -->
+  <section class="panel is-active" id="panel-bloch" role="tabpanel">
+    <div class="panel-head">
+      <div>
+        <span class="kicker">01 / 量子比特</span>
+        <h2>布洛赫球：一个量子比特的全部纯态</h2>
+      </div>
+      <p class="panel-note mono">|ψ⟩ = cos(θ/2)|0⟩ + e<sup>iφ</sup> sin(θ/2)|1⟩</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card sphere-card">
+        <canvas id="bloch" width="760" height="760" aria-label="布洛赫球可视化"></canvas>
+        <div class="sphere-legend">
+          <span><i class="dot cyan"></i>态矢量</span>
+          <span><i class="dot dim"></i>拖动旋转</span>
+        </div>
+      </div>
+
+      <div class="stack">
+        <div class="card">
+          <div class="card-head"><h3>控制</h3><span class="tag">θ / φ</span></div>
+          <label class="slider">
+            <span class="s-label">θ <em>极角</em></span>
+            <input id="theta" type="range" min="0" max="180" step="0.5" value="60">
+            <output id="theta-out" class="mono">60.0°</output>
+          </label>
+          <label class="slider">
+            <span class="s-label">φ <em>相位</em></span>
+            <input id="phi" type="range" min="0" max="360" step="1" value="45">
+            <output id="phi-out" class="mono">45°</output>
+          </label>
+          <div class="preset-row">
+            <button class="chip" data-state="0">|0⟩</button>
+            <button class="chip" data-state="1">|1⟩</button>
+            <button class="chip" data-state="plus">|+⟩</button>
+            <button class="chip" data-state="minus">|−⟩</button>
+            <button class="chip" data-state="i">|+i⟩</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>读数</h3><span class="tag" id="purity-tag">纯态</span></div>
+          <div class="readout-grid">
+            <div class="ro"><span class="ro-k">P(0)</span><b id="p0" class="mono">0.750</b></div>
+            <div class="ro"><span class="ro-k">P(1)</span><b id="p1" class="mono">0.250</b></div>
+            <div class="ro wide"><span class="ro-k">态矢量</span><code id="vec" class="mono">(0.612, 0.354, 0.707)</code></div>
+            <div class="ro wide"><span class="ro-k">振幅</span><code id="amps" class="mono">α = 0.866, β = 0.354 + 0.354i</code></div>
+          </div>
+          <div class="measure-row">
+            <button id="measure-btn" class="btn primary">测量一次</button>
+            <button id="measure-reset" class="btn ghost">清空统计</button>
+            <span class="hint-inline" id="measure-last">—</span>
+          </div>
+          <div class="histo" id="bloch-histo">
+            <div class="histo-col"><div class="histo-bar" id="h0"></div><span>|0⟩</span><b id="h0n" class="mono">0</b></div>
+            <div class="histo-col"><div class="histo-bar alt" id="h1"></div><span>|1⟩</span><b id="h1n" class="mono">0</b></div>
+          </div>
+          <p class="footnote">测量是概率性的：单次只能得到 0 或 1，但大量重复后计数比例会收敛到 |α|² : |β|²。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 02 量子电路 ============ -->
+  <section class="panel" id="panel-circuit" role="tabpanel" hidden>
+    <div class="panel-head">
+      <div>
+        <span class="kicker">02 / 量子电路</span>
+        <h2>搭一条电路，看态矢量怎么变</h2>
+      </div>
+      <p class="panel-note">3 个量子比特 · 8 列 · 双精度复数模拟</p>
+    </div>
+
+    <div class="toolbar card">
+      <div class="tool-group" id="gate-palette" role="group" aria-label="量子门">
+        <button class="gate-btn" data-gate="H">H</button>
+        <button class="gate-btn" data-gate="X">X</button>
+        <button class="gate-btn" data-gate="Y">Y</button>
+        <button class="gate-btn" data-gate="Z">Z</button>
+        <button class="gate-btn" data-gate="S">S</button>
+        <button class="gate-btn" data-gate="T">T</button>
+        <button class="gate-btn" data-gate="RX">Rx</button>
+        <button class="gate-btn" data-gate="RY">Ry</button>
+        <button class="gate-btn" data-gate="RZ">Rz</button>
+        <button class="gate-btn cx" data-gate="CX">●—⊕</button>
+      </div>
+      <label class="angle-ctl">
+        <span>θ</span>
+        <input id="gate-angle" type="range" min="0" max="360" step="15" value="90">
+        <output id="gate-angle-out" class="mono">90°</output>
+      </label>
+      <div class="tool-actions">
+        <button id="undo" class="btn ghost sm">撤销</button>
+        <button id="clear" class="btn ghost sm">清空</button>
+      </div>
+    </div>
+
+    <div class="grid-2 wide">
+      <div class="stack">
+        <div class="card">
+          <div class="card-head">
+            <h3>电路</h3>
+            <div class="preset-row tight">
+              <button class="chip sm" data-preset="bell">贝尔态</button>
+              <button class="chip sm" data-preset="ghz">GHZ</button>
+              <button class="chip sm" data-preset="uniform">均匀叠加</button>
+              <button class="chip sm" data-preset="interference">相位干涉</button>
+            </div>
+          </div>
+          <div class="circuit-wrap" id="circuit-wrap">
+            <div class="c-body" id="circuit-body"></div>
+            <svg class="cx-overlay" id="cx-overlay" aria-hidden="true"></svg>
+          </div>
+          <p class="hint" id="circuit-hint">选择上方量子门 → 点击电路格子放置；CNOT 先点控制点、再点同列的目标点。</p>
+          <div class="legend-row">
+            <span><i class="sw g-h"></i>H 叠加</span>
+            <span><i class="sw g-x"></i>X 翻转</span>
+            <span><i class="sw g-z"></i>Z 相位</span>
+            <span><i class="sw g-r"></i>旋转</span>
+            <span><i class="sw g-cx"></i>CNOT 纠缠</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h3>采样测量</h3>
+            <div class="shots-ctl">
+              <select id="shots" aria-label="采样次数">
+                <option value="256">256 次</option>
+                <option value="1024" selected>1024 次</option>
+                <option value="4096">4096 次</option>
+              </select>
+              <button id="run-shots" class="btn primary sm">运行</button>
+            </div>
+          </div>
+          <div class="pbars compact" id="shot-bars"><p class="empty">尚未采样。</p></div>
+          <p class="footnote" id="shot-note">采样使用伪随机数，按 |α|² 逐次坍缩。</p>
+        </div>
+      </div>
+
+      <div class="stack">
+        <div class="card">
+          <div class="card-head"><h3>测量概率</h3><span class="tag" id="depth-tag">2 层</span></div>
+          <div class="pbars" id="pbars"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>振幅与相位</h3><span class="tag mono" id="norm-tag">‖ψ‖ = 1.000</span></div>
+          <div class="amps" id="amps-table"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 03 纠缠 / CHSH ============ -->
+  <section class="panel" id="panel-chsh" role="tabpanel" hidden>
+    <div class="panel-head">
+      <div>
+        <span class="kicker">03 / 量子纠缠</span>
+        <h2>贝尔不等式：纠缠能不能超过经典极限？</h2>
+      </div>
+      <p class="panel-note mono">|S| ≤ 2 &nbsp;→&nbsp; 2√2 ≈ 2.828</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head"><h3>Alice / Bob 的测量设置</h3><span class="tag">Bell |Φ⁺⟩</span></div>
+        <p class="anno">共享一对处于 |Φ⁺⟩ = (|00⟩+|11⟩)/√2 的粒子。各自在两个可选方向中测量，单次结果只有 +1 / −1。角度为 0° 时两人结果完全相关。</p>
+        <div class="angles">
+          <label class="slider"><span class="s-label">a <em>Alice</em></span><input id="ang-a" type="range" min="-180" max="180" step="1" value="0"><output class="mono" id="ang-a-out">0°</output></label>
+          <label class="slider"><span class="s-label">a′ <em>Alice</em></span><input id="ang-ap" type="range" min="-180" max="180" step="1" value="90"><output class="mono" id="ang-ap-out">90°</output></label>
+          <label class="slider"><span class="s-label">b <em>Bob</em></span><input id="ang-b" type="range" min="-180" max="180" step="1" value="45"><output class="mono" id="ang-b-out">45°</output></label>
+          <label class="slider"><span class="s-label">b′ <em>Bob</em></span><input id="ang-bp" type="range" min="-180" max="180" step="1" value="135"><output class="mono" id="ang-bp-out">135°</output></label>
+        </div>
+        <div class="preset-row">
+          <button class="chip sm" data-chsh="optimal">最优角度</button>
+          <button class="chip sm" data-chsh="aligned">全部对齐</button>
+          <button class="chip sm" data-chsh="classical">经典模拟</button>
+        </div>
+        <button id="chsh-run" class="btn primary wide-btn">运行 80000 次符合测量</button>
+        <div class="chsh-out" id="chsh-out">
+          <p class="empty">点击运行，得到四组联合测量的关联值 E 与 S 统计量。</p>
+        </div>
+        <div class="joint">
+          <div class="joint-title mono" id="joint-title">联合结果分布 · 运行后显示</div>
+          <div class="joint-bars" id="joint-bars"></div>
+        </div>
+      </div>
+
+      <div class="stack">
+        <div class="card">
+          <div class="card-head"><h3>CHSH 统计量</h3><span class="tag" id="chsh-mode">量子</span></div>
+          <div class="s-big"><span class="s-prefix">|S|</span><b id="s-value" class="mono">—</b><span class="s-err mono" id="s-err"></span><span class="s-cap">S = E(a,b) − E(a,b′) + E(a′,b) + E(a′,b′)</span></div>
+          <div class="gauge" id="gauge">
+            <div class="gauge-track"></div>
+            <div class="gauge-zone" id="gauge-zone"></div>
+            <div class="gauge-tick first" style="left:0%"><span>0</span></div>
+            <div class="gauge-tick" style="left:50%"><span>2</span></div>
+            <div class="gauge-tick edge" style="left:70.711%"><span>2√2</span></div>
+            <div class="gauge-tick last" style="left:100%"><span>4</span></div>
+            <div class="gauge-marker" id="gauge-marker"></div>
+          </div>
+          <p class="gauge-caption">横轴 |S|；阴影区 2 &lt; |S| ≤ 2√2 是只有量子纠缠能到达的范围。</p>
+          <p class="footnote" id="chsh-verdict">运行后判断：局域隐变量模型能否解释这组数据？</p>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>关联函数 E(Δ)</h3><span class="tag mono">cos Δ</span></div>
+          <canvas id="corr" width="760" height="380" aria-label="关联函数曲线"></canvas>
+          <p class="footnote">四组设置对应的 Δ = 角度差；圆点为实测 E 值。曲线是量子力学的理论预测。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 04 Grover ============ -->
+  <section class="panel" id="panel-grover" role="tabpanel" hidden>
+    <div class="panel-head">
+      <div>
+        <span class="kicker">04 / Grover 搜索</span>
+        <h2>振幅放大：把答案“喊”出来</h2>
+      </div>
+      <p class="panel-note mono">N = 8，最优迭代 ≈ ⌊π√N/4⌋ = 2 次</p>
+    </div>
+
+    <div class="grid-2 wide">
+      <div class="card">
+        <div class="card-head">
+          <h3>搜索空间</h3>
+          <div class="marked-pick" id="marked-pick" role="group" aria-label="标记项"></div>
+        </div>
+        <div class="g-bars" id="g-bars"></div>
+        <div class="g-legend">
+          <span><i class="dot cyan"></i>正振幅</span>
+          <span><i class="dot pink"></i>负振幅</span>
+          <span><i class="dot amber"></i>被标记项</span>
+        </div>
+        <div class="g-controls">
+          <button id="g-reset" class="btn ghost">重置</button>
+          <button id="g-step" class="btn primary">下一步 ▸</button>
+          <button id="g-auto" class="btn ghost">自动播放</button>
+        </div>
+        <div class="g-stage mono" id="g-stage">已初始化：H⊗H⊗H，8 个候选等概率</div>
+      </div>
+
+      <div class="stack">
+        <div class="card">
+          <div class="card-head"><h3>迭代记录</h3><span class="tag" id="g-iter">阶段 0 / 6</span></div>
+          <ol class="log" id="g-log"></ol>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>效率对比</h3></div>
+          <div class="cmp">
+            <div class="cmp-row">
+              <span class="cmp-k">经典暴力搜索</span>
+              <div class="cmp-track"><i style="width:100%"></i></div>
+              <b class="mono">平均 4.5 次</b>
+            </div>
+            <div class="cmp-row">
+              <span class="cmp-k">Grover（1 次迭代）</span>
+              <div class="cmp-track"><i class="q" id="cmp-1"></i></div>
+              <b class="mono" id="cmp-1v">78.1%</b>
+            </div>
+            <div class="cmp-row">
+              <span class="cmp-k">Grover（2 次迭代）</span>
+              <div class="cmp-track"><i class="q" id="cmp-2"></i></div>
+              <b class="mono" id="cmp-2v">94.5%</b>
+            </div>
+          </div>
+          <p class="footnote">Grover 的代价是 O(√N)：N = 8 时约 2 次迭代即可把目标概率推到 94.5%，但继续迭代会“转过头”下降。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 05 原理 ============ -->
+  <section class="panel" id="panel-theory" role="tabpanel" hidden>
+    <div class="panel-head">
+      <div>
+        <span class="kicker">05 / 数学原理</span>
+        <h2>五个公式，撑起整页演示</h2>
+      </div>
+      <p class="panel-note">所有面板的结果都从这五条出发</p>
+    </div>
+
+    <div class="theory-grid">
+      <article class="card formula">
+        <h3>1 · 态矢量</h3>
+        <p class="math">|ψ⟩ = Σ<sub>i=0</sub><sup>2ⁿ−1</sup> α<sub>i</sub> |i⟩ ， Σ |α<sub>i</sub>|² = 1</p>
+        <p>n 个量子比特需要 2<sup>n</sup> 个复数。量子计算机的“并行”来自这个指数级的态空间；经典计算机模拟它，代价也正好是指数级。</p>
+      </article>
+
+      <article class="card formula">
+        <h3>2 · 幺正演化</h3>
+        <p class="math">|ψ′⟩ = U|ψ⟩ ， U<sup>†</sup>U = I</p>
+        <p>所有量子门都是可逆的幺正矩阵，因此量子电路没有“扇出/覆写”。H、X、Z、CNOT 都可以写成 2×2 或 4×4 的矩阵。</p>
+      </article>
+
+      <article class="card formula">
+        <h3>3 · 张量积与纠缠</h3>
+        <p class="math">|Φ⁺⟩ = (|00⟩ + |11⟩) / √2</p>
+        <p>它无法写成 |a⟩⊗|b⟩。测量其中一个比特，另一个的结果立刻确定——不是“提前约好”，而是态本身不可分解。</p>
+      </article>
+
+      <article class="card formula">
+        <h3>4 · 测量公设</h3>
+        <p class="math">P(i) = |α<sub>i</sub>|² ， |ψ⟩ → |i⟩</p>
+        <p>测量是唯一不可逆的环节。单次结果随机，统计分布完全由振幅决定；这也解释了为什么量子算法要“放大”目标振幅。</p>
+      </article>
+
+      <article class="card formula">
+        <h3>5 · 贝尔 / CHSH</h3>
+        <p class="math">S = E(a,b) − E(a,b′) + E(a′,b) + E(a′,b′) ， |S| ≤ 2√2</p>
+        <p>局域隐变量理论要求 |S| ≤ 2；量子力学允许到 2√2（Tsirelson 界）。实验上 S ≈ 2.8 是对局域实在论最直接的反驳。</p>
+      </article>
+
+      <article class="card formula">
+        <h3>附 · 复杂度对照</h3>
+        <table class="mini-table">
+          <tr><th>任务</th><th>经典</th><th>量子</th></tr>
+          <tr><td>无序搜索</td><td>O(N)</td><td>O(√N)</td></tr>
+          <tr><td>整数分解</td><td>亚指数</td><td>多项式</td></tr>
+          <tr><td>态矢量存储</td><td>2<sup>n</sup> 复数</td><td>n 个物理比特</td></tr>
+          <tr><td>复制未知态</td><td>可以</td><td>不可克隆</td></tr>
+        </table>
+      </article>
+    </div>
+
+    <div class="card limits">
+      <h3>这个模型的边界</h3>
+      <p>本页是一个<b>理想化教学模型</b>：不含噪声、退相干、门误差与硬件拓扑约束，量子比特数限制在 3 个（态矢量 8 维），测量使用伪随机采样。它演示的是量子力学的数学结构，而不是某台真实量子计算机的行为。</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>量子计算 · 交互模型实验室</span>
+  <span class="sep">/</span>
+  <span>纯前端 · 单文件态矢量模拟器 · 无网络依赖</span>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
